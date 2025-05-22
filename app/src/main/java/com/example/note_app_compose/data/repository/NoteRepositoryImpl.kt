@@ -12,4 +12,28 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun addNote(note: Note) {
         api.createNote(NoteDto(title = note.title, content = note.content))
     }
+
+    override suspend fun getAllNotes(): List<Note> {
+        return api.getAllNotes().map { dto ->
+            Note(
+                id = dto.id,  // ✅ Map id from DTO
+                title = dto.title,
+                content = dto.content
+            )
+        }
+    }
+
+    override suspend fun updateNote(note: Note) {
+        val id = note.id ?: throw IllegalArgumentException("Note ID is required for update")
+        // Pass only title and content in DTO body
+        api.updateNote(id, NoteDto(title = note.title, content = note.content))
+    }
+
+    override suspend fun deleteNote(id: String) {
+        val response = api.deleteNote(id)
+        if (!response.isSuccessful) {
+            throw Exception("Delete failed with code: ${response.code()}")
+        }
+    }
+
 }
